@@ -1,4 +1,4 @@
-import { Clock } from '../../modules/machines/application/ports/clock';
+import { Clock } from '../../shared/application/ports/clock';
 
 export class SystemClock implements Clock {
   now(): Date {

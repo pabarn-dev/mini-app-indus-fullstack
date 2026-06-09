@@ -1,7 +1,7 @@
 import { Machine } from '../../domain/entities/machine';
 import { DuplicateMachineCodeError } from '../../domain/errors/duplicate-machine-code.error';
-import { Clock } from '../ports/clock';
-import { IdGenerator } from '../ports/id-generator';
+import { Clock } from '../../../../shared/application/ports/clock';
+import { IdGenerator } from '../../../../shared/application/ports/id-generator';
 import { MachineRepository } from '../ports/machine.repository';
 
 export interface CreateMachineInput {

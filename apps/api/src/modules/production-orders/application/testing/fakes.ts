@@ -12,7 +12,7 @@ export class FixedClock implements Clock {
 export class SequentialIdGenerator implements IdGenerator {
   private counter = 0;
 
-  constructor(private readonly prefix: string = 'machine') {}
+  constructor(private readonly prefix: string = 'po') {}
 
   generate(): string {
     this.counter += 1;
