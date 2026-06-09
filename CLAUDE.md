@@ -105,6 +105,7 @@ docker compose ps                      # PostgreSQL healthy 5433
 
 - `CLAUDE.md`
 - `README.md`
+- `docs/roadmap.md`
 - `docs/database.md`
 - `docs/dev-access.md`
 - `docs/decisions/001-stack-versions.md`
