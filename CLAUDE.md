@@ -10,9 +10,9 @@ architecture hexagonale. Domaine : machines, ordres de production, lots, contrô
 - Phase 1 (init monorepo) — **terminée**
 - Phase 2 (base de données Prisma) — **terminée**
 - Phase 3 (module Machines) — **terminée**
-- Phase 4 (module Production Orders) — **en cours**
-  - Lots **4B (domaine)**, **4C (use cases + ports)**, **4D (infra Prisma + audit transactionnel)** terminés
-  - **Prochaine étape : Lot 4E — Presentation Production Orders**
+- Phase 4 (module Production Orders) — **terminée** (4B→4F : domaine, use cases, infra Prisma +
+  audit transactionnel, presentation, tests unit + intégration + e2e)
+- **Prochaine étape : Phase 5 — Batches & Quality Checks**
 
 ## 2. Stack actuelle
 
@@ -48,14 +48,15 @@ apps/api/src/
 intégration + e2e. `MachineRepository` **exporté** (token `MACHINE_REPOSITORY`) pour usage par
 Production Orders via `MachineGateway`.
 
-**Production Orders — en cours.**
+**Production Orders — terminé.**
 
-- Domaine terminé : statuts `DRAFT → PLANNED → IN_PROGRESS → COMPLETED` / `CANCELLED`,
+- Domaine : statuts `DRAFT → PLANNED → IN_PROGRESS → COMPLETED` / `CANCELLED`,
   transitions immuables `plan/start/complete/cancel`, transitions invalides refusées.
-- Use cases terminés (Create/List/GetById/Plan/Start/Complete/Cancel).
-- Infra Prisma terminée (repository, mapper, `MachineGatewayAdapter`, `PrismaAuditLogWriter`).
-- **AuditLog transactionnel terminé** (update + audit dans une seule transaction).
-- **Presentation pas encore faite** (Lot 4E).
+- Use cases (Create/List/GetById/Plan/Start/Complete/Cancel).
+- Infra Prisma (repository, mapper, `MachineGatewayAdapter`, `PrismaAuditLogWriter`).
+- **AuditLog transactionnel** (update + audit dans une seule transaction ; rollback testé).
+- Presentation : endpoints `GET/POST /production-orders`, `GET /:id`,
+  `POST /:id/{plan|start|complete|cancel}` ; tests unit + intégration + **e2e**.
 
 ## 5. Shared important
 
