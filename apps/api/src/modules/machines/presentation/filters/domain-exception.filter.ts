@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import type { Response } from 'express';
-import { DomainError } from '../../domain/errors/domain.error';
+import { DomainError } from '../../../../shared/domain/errors/domain.error';
 import { DuplicateMachineCodeError } from '../../domain/errors/duplicate-machine-code.error';
 import { InvalidMachineError } from '../../domain/errors/invalid-machine.error';
 import { MachineNotFoundError } from '../../domain/errors/machine-not-found.error';
