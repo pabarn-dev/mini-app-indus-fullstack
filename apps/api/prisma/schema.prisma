@@ -1,0 +1,155 @@
+// Industrial Production Pilot — data model (Phase 2).
+// Prisma 7: connection URL lives in prisma.config.ts (not here).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------- ENUMS ----------
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum MachineStatus {
+  ACTIVE
+  MAINTENANCE
+  DISABLED
+}
+
+enum ProductionOrderStatus {
+  DRAFT
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QualityCheckResult {
+  PASSED
+  WARNING
+  FAILED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATUS_CHANGE
+}
+
+enum AuditEntityType {
+  USER
+  MACHINE
+  PRODUCTION_ORDER
+  BATCH
+  QUALITY_CHECK
+}
+
+// ---------- MODELS ----------
+
+model User {
+  id           String   @id @default(uuid(7))
+  email        String   @unique
+  name         String
+  role         UserRole @default(VIEWER)
+  passwordHash String? // nullable for now — real auth is Phase 6
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  productionOrders ProductionOrder[] @relation("OrderCreatedBy")
+  qualityChecks    QualityCheck[]    @relation("CheckPerformedBy")
+  auditLogs        AuditLog[]
+
+  @@index([role])
+}
+
+model Machine {
+  id        String        @id @default(uuid(7))
+  code      String        @unique // business identifier, e.g. "CNC-01"
+  name      String
+  status    MachineStatus @default(ACTIVE)
+  location  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  productionOrders ProductionOrder[]
+
+  @@index([status])
+}
+
+model ProductionOrder {
+  id             String                @id @default(uuid(7))
+  reference      String                @unique // e.g. "PO-2026-0001"
+  status         ProductionOrderStatus @default(DRAFT)
+  targetQuantity Int
+  machineId      String
+  createdById    String?
+  plannedAt      DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  machine   Machine @relation(fields: [machineId], references: [id], onDelete: Restrict)
+  createdBy User?   @relation("OrderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  batches   Batch[]
+
+  @@index([status])
+  @@index([machineId])
+  @@index([createdById])
+}
+
+model Batch {
+  id                String    @id @default(uuid(7))
+  productionOrderId String
+  sequence          Int // batch number within the order
+  quantityProduced  Int       @default(0)
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  productionOrder ProductionOrder @relation(fields: [productionOrderId], references: [id], onDelete: Restrict)
+  qualityChecks   QualityCheck[]
+
+  @@unique([productionOrderId, sequence])
+  @@index([productionOrderId])
+}
+
+model QualityCheck {
+  id          String             @id @default(uuid(7))
+  batchId     String
+  result      QualityCheckResult
+  notes       String?
+  checkedById String?
+  createdAt   DateTime           @default(now()) // immutable record — no updatedAt
+
+  batch     Batch @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  checkedBy User? @relation("CheckPerformedBy", fields: [checkedById], references: [id], onDelete: SetNull)
+
+  @@index([batchId])
+  @@index([result])
+}
+
+model AuditLog {
+  id         String          @id @default(uuid(7))
+  action     AuditAction
+  entityType AuditEntityType
+  entityId   String // soft reference (no FK) — generic audit journal
+  userId     String?
+  metadata   Json? // e.g. { "from": "DRAFT", "to": "PLANNED" }
+  createdAt  DateTime        @default(now()) // append-only — no updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
