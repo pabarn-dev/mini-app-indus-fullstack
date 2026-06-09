@@ -192,4 +192,5 @@ voir [docs/dev-access.md](dev-access.md). Aucun mot de passe n'est stocké (auth
 
 - [ADR 001 — Stack & versions](decisions/001-stack-versions.md)
 - [ADR 002 — Database modeling](decisions/002-database-modeling.md)
+- [ADR 003 — Production Orders : transitions, audit transactionnel & MachineGateway](decisions/003-production-orders-audit.md)
 - [docs/dev-access.md](dev-access.md)
