@@ -43,5 +43,7 @@ import { MachinesController } from './presentation/controllers/machines.controll
       inject: [MACHINE_REPOSITORY],
     },
   ],
+  // Exposed so other modules (Production Orders) can read machines via MachineGateway.
+  exports: [MACHINE_REPOSITORY],
 })
 export class MachinesModule {}

@@ -10,7 +10,6 @@
     "experimentalDecorators": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "incremental": true,
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],

@@ -1,5 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { DomainExceptionFilter } from './modules/machines/presentation/filters/domain-exception.filter';
+import { DomainExceptionFilter } from './shared/presentation/filters/domain-exception.filter';
 
 // Shared app configuration used by both the runtime bootstrap (main.ts) and the
 // e2e tests, so they exercise the exact same pipeline (validation + error mapping).
