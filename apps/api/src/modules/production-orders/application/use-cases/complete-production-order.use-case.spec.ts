@@ -4,6 +4,7 @@ import { ProductionOrderStatus } from '../../domain/entities/production-order-st
 import { InvalidProductionOrderTransitionError } from '../../domain/errors/invalid-production-order-transition.error';
 import { ProductionOrderNotFoundError } from '../../domain/errors/production-order-not-found.error';
 import { FixedClock } from '../testing/fakes';
+import { ImmediateTransactionRunner } from '../testing/immediate-transaction-runner';
 import { InMemoryAuditLogWriter } from '../testing/in-memory-audit-log-writer';
 import { InMemoryProductionOrderRepository } from '../testing/in-memory-production-order.repository';
 import { CompleteProductionOrderUseCase } from './complete-production-order.use-case';
@@ -30,7 +31,12 @@ describe('CompleteProductionOrderUseCase', () => {
   beforeEach(() => {
     orders = new InMemoryProductionOrderRepository();
     audit = new InMemoryAuditLogWriter();
-    useCase = new CompleteProductionOrderUseCase(orders, audit, new FixedClock(now));
+    useCase = new CompleteProductionOrderUseCase(
+      orders,
+      audit,
+      new FixedClock(now),
+      new ImmediateTransactionRunner(),
+    );
   });
 
   it('completes an IN_PROGRESS order and records an audit entry', async () => {

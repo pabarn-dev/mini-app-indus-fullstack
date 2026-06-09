@@ -6,6 +6,7 @@ import { MachineNotFoundForProductionOrderError } from '../../domain/errors/mach
 import { MachineNotUsableForProductionOrderError } from '../../domain/errors/machine-not-usable-for-production-order.error';
 import { ProductionOrderNotFoundError } from '../../domain/errors/production-order-not-found.error';
 import { FixedClock } from '../testing/fakes';
+import { ImmediateTransactionRunner } from '../testing/immediate-transaction-runner';
 import { InMemoryAuditLogWriter } from '../testing/in-memory-audit-log-writer';
 import { InMemoryMachineGateway } from '../testing/in-memory-machine-gateway';
 import { InMemoryProductionOrderRepository } from '../testing/in-memory-production-order.repository';
@@ -37,7 +38,13 @@ describe('StartProductionOrderUseCase', () => {
     machines.set({ id: 'machine-active', status: 'ACTIVE', isUsable: true });
     machines.set({ id: 'machine-maintenance', status: 'MAINTENANCE', isUsable: false });
     audit = new InMemoryAuditLogWriter();
-    useCase = new StartProductionOrderUseCase(orders, machines, audit, new FixedClock(now));
+    useCase = new StartProductionOrderUseCase(
+      orders,
+      machines,
+      audit,
+      new FixedClock(now),
+      new ImmediateTransactionRunner(),
+    );
   });
 
   it('starts a PLANNED order on an ACTIVE machine and records an audit entry', async () => {

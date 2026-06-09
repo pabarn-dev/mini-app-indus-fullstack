@@ -3,6 +3,7 @@ import { ProductionOrder } from '../../domain/entities/production-order';
 import { ProductionOrderStatus } from '../../domain/entities/production-order-status';
 import { InvalidProductionOrderTransitionError } from '../../domain/errors/invalid-production-order-transition.error';
 import { ProductionOrderNotFoundError } from '../../domain/errors/production-order-not-found.error';
+import { ImmediateTransactionRunner } from '../testing/immediate-transaction-runner';
 import { InMemoryAuditLogWriter } from '../testing/in-memory-audit-log-writer';
 import { InMemoryProductionOrderRepository } from '../testing/in-memory-production-order.repository';
 import { CancelProductionOrderUseCase } from './cancel-production-order.use-case';
@@ -29,7 +30,7 @@ describe('CancelProductionOrderUseCase', () => {
   beforeEach(() => {
     orders = new InMemoryProductionOrderRepository();
     audit = new InMemoryAuditLogWriter();
-    useCase = new CancelProductionOrderUseCase(orders, audit);
+    useCase = new CancelProductionOrderUseCase(orders, audit, new ImmediateTransactionRunner());
   });
 
   it('cancels a DRAFT order and records an audit entry', async () => {
