@@ -4,13 +4,13 @@ import {
   AuditEntityType as PrismaAuditEntityType,
   Prisma,
 } from '@prisma/client';
-import { PrismaService } from '../../../../infrastructure/prisma/prisma.service';
 import {
   AuditAction,
   AuditEntityType,
   AuditEntry,
   AuditLogWriter,
-} from '../../../../shared/application/ports/audit-log-writer';
+} from '../../shared/application/ports/audit-log-writer';
+import { PrismaService } from './prisma.service';
 
 const toPrismaAction: Record<AuditAction, PrismaAuditAction> = {
   [AuditAction.CREATE]: PrismaAuditAction.CREATE,
@@ -27,6 +27,8 @@ const toPrismaEntityType: Record<AuditEntityType, PrismaAuditEntityType> = {
   [AuditEntityType.QUALITY_CHECK]: PrismaAuditEntityType.QUALITY_CHECK,
 };
 
+// Shared infrastructure: the audit port is cross-cutting, so its Prisma
+// implementation lives here, not under any single feature module.
 @Injectable()
 export class PrismaAuditLogWriter implements AuditLogWriter {
   constructor(private readonly prisma: PrismaService) {}

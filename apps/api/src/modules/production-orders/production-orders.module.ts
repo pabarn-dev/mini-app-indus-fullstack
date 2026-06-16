@@ -28,7 +28,7 @@ import { ListProductionOrdersUseCase } from './application/use-cases/list-produc
 import { PlanProductionOrderUseCase } from './application/use-cases/plan-production-order.use-case';
 import { StartProductionOrderUseCase } from './application/use-cases/start-production-order.use-case';
 import { MachineGatewayAdapter } from './infrastructure/prisma/machine-gateway.adapter';
-import { PrismaAuditLogWriter } from './infrastructure/prisma/prisma-audit-log-writer';
+import { PrismaAuditLogWriter } from '../../infrastructure/prisma/prisma-audit-log-writer';
 import { PrismaProductionOrderRepository } from './infrastructure/prisma/prisma-production-order.repository';
 import { ProductionOrdersController } from './presentation/controllers/production-orders.controller';
 

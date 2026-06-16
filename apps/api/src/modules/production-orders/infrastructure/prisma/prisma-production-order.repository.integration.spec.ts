@@ -10,8 +10,8 @@ import { PrismaMachineRepository } from '../../../machines/infrastructure/prisma
 import { PlanProductionOrderUseCase } from '../../application/use-cases/plan-production-order.use-case';
 import { ProductionOrder } from '../../domain/entities/production-order';
 import { ProductionOrderStatus } from '../../domain/entities/production-order-status';
+import { PrismaAuditLogWriter } from '../../../../infrastructure/prisma/prisma-audit-log-writer';
 import { MachineGatewayAdapter } from './machine-gateway.adapter';
-import { PrismaAuditLogWriter } from './prisma-audit-log-writer';
 import { PrismaProductionOrderRepository } from './prisma-production-order.repository';
 
 const fixedNow = new Date('2026-02-01T00:00:00Z');
