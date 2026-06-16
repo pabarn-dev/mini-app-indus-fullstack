@@ -4,7 +4,11 @@ import { ProductionOrder } from '../../domain/entities/production-order';
 import { MachineNotFoundForProductionOrderError } from '../../domain/errors/machine-not-found-for-production-order.error';
 import { MachineNotUsableForProductionOrderError } from '../../domain/errors/machine-not-usable-for-production-order.error';
 import { ProductionOrderNotFoundError } from '../../domain/errors/production-order-not-found.error';
-import { AuditAction, AuditEntityType, AuditLogWriter } from '../ports/audit-log-writer';
+import {
+  AuditAction,
+  AuditEntityType,
+  AuditLogWriter,
+} from '../../../../shared/application/ports/audit-log-writer';
 import { MachineGateway } from '../ports/machine-gateway';
 import { ProductionOrderRepository } from '../ports/production-order.repository';
 

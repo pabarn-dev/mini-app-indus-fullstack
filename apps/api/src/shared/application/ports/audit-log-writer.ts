@@ -1,5 +1,5 @@
-// Audit enums (domain unions, mapped to Prisma enums in infrastructure).
-// Kept here for now; extractable to a shared audit module when Batches reuse it.
+// Shared, cross-cutting audit port (like IdGenerator / Clock / TransactionRunner).
+// Domain unions here, mapped to Prisma enums in infrastructure.
 export const AuditAction = {
   CREATE: 'CREATE',
   UPDATE: 'UPDATE',

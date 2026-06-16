@@ -10,7 +10,7 @@ import {
   AuditEntityType,
   AuditEntry,
   AuditLogWriter,
-} from '../../application/ports/audit-log-writer';
+} from '../../../../shared/application/ports/audit-log-writer';
 
 const toPrismaAction: Record<AuditAction, PrismaAuditAction> = {
   [AuditAction.CREATE]: PrismaAuditAction.CREATE,

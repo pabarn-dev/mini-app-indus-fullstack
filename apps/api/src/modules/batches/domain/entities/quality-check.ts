@@ -15,8 +15,8 @@ export interface CreateQualityCheckProps {
   readonly id: string;
   readonly batchId: string;
   readonly result: string;
-  readonly notes?: string | null;
-  readonly checkedById?: string | null;
+  readonly notes?: string | null | undefined;
+  readonly checkedById?: string | null | undefined;
   readonly createdAt: Date;
 }
 

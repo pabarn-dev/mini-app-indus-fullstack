@@ -14,7 +14,7 @@ import {
   MachineRepository,
 } from '../machines/application/ports/machine.repository';
 import { MachinesModule } from '../machines/machines.module';
-import { AUDIT_LOG_WRITER, AuditLogWriter } from './application/ports/audit-log-writer';
+import { AUDIT_LOG_WRITER, AuditLogWriter } from '../../shared/application/ports/audit-log-writer';
 import { MACHINE_GATEWAY, MachineGateway } from './application/ports/machine-gateway';
 import {
   PRODUCTION_ORDER_REPOSITORY,
