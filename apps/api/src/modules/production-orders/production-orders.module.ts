@@ -17,6 +17,10 @@ import { MachinesModule } from '../machines/machines.module';
 import { AUDIT_LOG_WRITER, AuditLogWriter } from '../../shared/application/ports/audit-log-writer';
 import { MACHINE_GATEWAY, MachineGateway } from './application/ports/machine-gateway';
 import {
+  PRODUCTION_ORDER_QUALITY_GATE,
+  ProductionOrderQualityGate,
+} from './application/ports/production-order-quality-gate';
+import {
   PRODUCTION_ORDER_REPOSITORY,
   ProductionOrderRepository,
 } from './application/ports/production-order.repository';
@@ -29,6 +33,7 @@ import { PlanProductionOrderUseCase } from './application/use-cases/plan-product
 import { StartProductionOrderUseCase } from './application/use-cases/start-production-order.use-case';
 import { MachineGatewayAdapter } from './infrastructure/prisma/machine-gateway.adapter';
 import { PrismaAuditLogWriter } from '../../infrastructure/prisma/prisma-audit-log-writer';
+import { PrismaProductionOrderQualityGate } from './infrastructure/prisma/production-order-quality-gate.adapter';
 import { PrismaProductionOrderRepository } from './infrastructure/prisma/prisma-production-order.repository';
 import { ProductionOrdersController } from './presentation/controllers/production-orders.controller';
 
@@ -42,6 +47,7 @@ import { ProductionOrdersController } from './presentation/controllers/productio
     { provide: TRANSACTION_RUNNER, useClass: PrismaTransactionRunner },
     { provide: ID_GENERATOR, useClass: UuidV7Generator },
     { provide: CLOCK, useClass: SystemClock },
+    { provide: PRODUCTION_ORDER_QUALITY_GATE, useClass: PrismaProductionOrderQualityGate },
     {
       provide: MACHINE_GATEWAY,
       useFactory: (machines: MachineRepository) => new MachineGatewayAdapter(machines),
@@ -102,8 +108,15 @@ import { ProductionOrdersController } from './presentation/controllers/productio
         audit: AuditLogWriter,
         clock: Clock,
         transactions: TransactionRunner,
-      ) => new CompleteProductionOrderUseCase(orders, audit, clock, transactions),
-      inject: [PRODUCTION_ORDER_REPOSITORY, AUDIT_LOG_WRITER, CLOCK, TRANSACTION_RUNNER],
+        qualityGate: ProductionOrderQualityGate,
+      ) => new CompleteProductionOrderUseCase(orders, audit, clock, transactions, qualityGate),
+      inject: [
+        PRODUCTION_ORDER_REPOSITORY,
+        AUDIT_LOG_WRITER,
+        CLOCK,
+        TRANSACTION_RUNNER,
+        PRODUCTION_ORDER_QUALITY_GATE,
+      ],
     },
     {
       provide: CancelProductionOrderUseCase,

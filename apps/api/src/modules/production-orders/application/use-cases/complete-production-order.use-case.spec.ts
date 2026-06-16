@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ProductionOrder } from '../../domain/entities/production-order';
 import { ProductionOrderStatus } from '../../domain/entities/production-order-status';
 import { InvalidProductionOrderTransitionError } from '../../domain/errors/invalid-production-order-transition.error';
+import { ProductionOrderHasFailedQualityCheckError } from '../../domain/errors/production-order-has-failed-quality-check.error';
 import { ProductionOrderNotFoundError } from '../../domain/errors/production-order-not-found.error';
 import { FixedClock } from '../testing/fakes';
 import { ImmediateTransactionRunner } from '../testing/immediate-transaction-runner';
 import { InMemoryAuditLogWriter } from '../testing/in-memory-audit-log-writer';
+import { InMemoryProductionOrderQualityGate } from '../testing/in-memory-production-order-quality-gate';
 import { InMemoryProductionOrderRepository } from '../testing/in-memory-production-order.repository';
 import { CompleteProductionOrderUseCase } from './complete-production-order.use-case';
 
@@ -26,16 +28,19 @@ function order(id: string): ProductionOrder {
 describe('CompleteProductionOrderUseCase', () => {
   let orders: InMemoryProductionOrderRepository;
   let audit: InMemoryAuditLogWriter;
+  let qualityGate: InMemoryProductionOrderQualityGate;
   let useCase: CompleteProductionOrderUseCase;
 
   beforeEach(() => {
     orders = new InMemoryProductionOrderRepository();
     audit = new InMemoryAuditLogWriter();
+    qualityGate = new InMemoryProductionOrderQualityGate();
     useCase = new CompleteProductionOrderUseCase(
       orders,
       audit,
       new FixedClock(now),
       new ImmediateTransactionRunner(),
+      qualityGate,
     );
   });
 
@@ -47,6 +52,18 @@ describe('CompleteProductionOrderUseCase', () => {
     expect(updated.status).toBe(ProductionOrderStatus.COMPLETED);
     expect(updated.completedAt).toEqual(now);
     expect(audit.records[0]).toMatchObject({ metadata: { from: 'IN_PROGRESS', to: 'COMPLETED' } });
+  });
+
+  it('refuses completion and writes no audit when a batch has a FAILED quality check', async () => {
+    await orders.create(order('po-fail').plan(now).start(now));
+    qualityGate.markFailed('po-fail');
+
+    await expect(useCase.execute('po-fail')).rejects.toBeInstanceOf(
+      ProductionOrderHasFailedQualityCheckError,
+    );
+
+    expect((await orders.findById('po-fail'))?.status).toBe(ProductionOrderStatus.IN_PROGRESS);
+    expect(audit.records).toHaveLength(0);
   });
 
   it('throws when the order does not exist', async () => {
