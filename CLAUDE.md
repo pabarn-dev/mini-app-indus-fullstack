@@ -12,7 +12,9 @@ architecture hexagonale. Domaine : machines, ordres de production, lots, contrô
 - Phase 3 (module Machines) — **terminée**
 - Phase 4 (module Production Orders) — **terminée** (4B→4F : domaine, use cases, infra Prisma +
   audit transactionnel, presentation, tests unit + intégration + e2e)
-- **Prochaine étape : Phase 5 — Batches & Quality Checks**
+- Phase 5 (Batches & Quality Checks) — **terminée** (5B→5F : domaine, use cases, infra Prisma +
+  audit transactionnel, quality gate, presentation, tests unit + intégration + e2e)
+- **Prochaine étape : Phase 6 — Auth / rôles / sécurité API**
 
 ## 2. Stack actuelle
 
@@ -57,13 +59,34 @@ Production Orders via `MachineGateway`.
 - **AuditLog transactionnel** (update + audit dans une seule transaction ; rollback testé).
 - Presentation : endpoints `GET/POST /production-orders`, `GET /:id`,
   `POST /:id/{plan|start|complete|cancel}` ; tests unit + intégration + **e2e**.
+- **Complétion bloquée si un batch a un QualityCheck `FAILED`** (port `ProductionOrderQualityGate`).
+
+**Batches & Quality Checks — terminé.**
+
+- Modèle : **ProductionOrder** = ordre à produire ; **Batch** = exécution réelle / lot ;
+  **QualityCheck** = contrôle qualité d'un batch.
+- Domaine : `Batch` immuable, état dérivé de `completedAt` (pas de colonne status) ;
+  `QualityCheck` **append-only** (`PASSED` / `WARNING` / `FAILED`).
+- Règles (use cases) : Batch créé **uniquement** sur un ProductionOrder `IN_PROGRESS` ;
+  `sequence` **auto** (`max+1`) ; `recordQuantity` = **quantité totale produite** (set, pas un
+  delta) ; batch terminé **non modifiable** ; ordre **non complétable** si un de ses batches a un
+  QualityCheck `FAILED`.
+- Endpoints : `POST /batches`, `GET /batches?productionOrderId=…`, `GET /batches/:id`,
+  `PATCH /batches/:id/quantity`, `POST /batches/:id/complete`,
+  `POST /batches/:id/quality-checks`, `GET /batches/:id/quality-checks`.
+- Audit transactionnel : `complete batch → STATUS_CHANGE / BATCH` (`{ from: "OPEN", to: "COMPLETED" }`),
+  `add quality check → CREATE / QUALITY_CHECK` ; refus de complétion sur `FAILED` → **aucun audit**.
+- Infra Prisma (mappers, repositories, `ProductionOrderGatewayAdapter`) ; tests unit, intégration,
+  **e2e** et rollback.
 
 ## 5. Shared important
 
 - `src/shared/domain/errors/` : `DomainError` (base) → `NotFoundDomainError` (404),
   `ConflictDomainError` (409), `ValidationDomainError` (400). Le `DomainExceptionFilter`
   mappe via ces bases sémantiques.
-- `src/shared/application/ports/` : `IdGenerator`, `Clock`, `TransactionRunner` (+ tokens).
+- `src/shared/application/ports/` : `IdGenerator`, `Clock`, `TransactionRunner`,
+  **`AuditLogWriter`** (port transversal) (+ tokens).
+- `src/infrastructure/prisma/` : `PrismaAuditLogWriter` (impl partagée du port d'audit).
 
 ## 6. Décisions importantes
 
@@ -74,10 +97,17 @@ Production Orders via `MachineGateway`.
   en intégration).
 - `MachineGateway` expose **seulement un read model minimal** `{ id, status, isUsable }`
   (pas de Prisma, pas d'entité Machine).
-- AuditLog écrit **uniquement sur les transitions de statut**, pas à la création.
+- AuditLog écrit **uniquement sur les transitions de statut**, pas à la création (sauf
+  QualityCheck : `CREATE` à l'ajout, car le contrôle est l'acte tracé).
+- `AuditLogWriter` est un **port partagé** ; `PrismaAuditLogWriter` vit en **infra partagée**.
+- **Quality gate côté ProductionOrders** : `BatchesModule` importe `ProductionOrdersModule` (qui
+  exporte `PRODUCTION_ORDER_REPOSITORY`) ; l'inverse est interdit → **pas de cycle**. L'adapter du
+  gate lit `qualityCheck`/`batch` via Prisma sans importer le module Batches.
+- Le check `FAILED` est fait **hors transaction** (lecture préalable) — limite connue V1.
 - `userId = null` tant qu'il n'y a pas d'auth (Phase 6).
 - **Pas de migration ni reset DB sans validation explicite.**
 - Détails Production Orders / audit : `docs/decisions/003-production-orders-audit.md`.
+- Détails Batches / quality checks / quality gate : `docs/decisions/004-batches-quality-checks.md`.
 
 ## 7. Tests et commandes utiles
 
@@ -111,4 +141,5 @@ docker compose ps                      # PostgreSQL healthy 5433
 - `docs/decisions/001-stack-versions.md`
 - `docs/decisions/002-database-modeling.md`
 - `docs/decisions/003-production-orders-audit.md`
+- `docs/decisions/004-batches-quality-checks.md`
 - `apps/api/prisma/schema.prisma`

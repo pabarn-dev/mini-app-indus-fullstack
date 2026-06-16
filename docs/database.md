@@ -152,7 +152,11 @@ Les contraintes `@unique` créent déjà leur index.
 - **Append-only** (`createdAt` seul), `userId` en `SetNull` (le journal survit à la
   suppression d'un utilisateur).
 - La cohérence (entityId valide, action correcte) est garantie par les **use cases**
-  applicatifs (Phase 4), pas par la base.
+  applicatifs (Phases 4 et 5), pas par la base.
+- Entités tracées : `PRODUCTION_ORDER` (`STATUS_CHANGE` sur transitions), `BATCH`
+  (`STATUS_CHANGE` à la complétion d'un lot) et `QUALITY_CHECK` (`CREATE` à l'ajout d'un contrôle).
+- **Aucun changement de schéma en Phase 5** : les modèles `Batch` et `QualityCheck` existent
+  depuis la Phase 2 ; la Phase 5 n'a ajouté que du code applicatif.
 
 ## 7. Stratégie de suppression (Restrict / SetNull)
 
