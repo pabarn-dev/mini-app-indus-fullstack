@@ -14,7 +14,7 @@ import { QualityCheckRepository } from '../ports/quality-check.repository';
 export interface AddQualityCheckInput {
   readonly batchId: string;
   readonly result: string;
-  readonly notes?: string | null;
+  readonly notes?: string | null | undefined;
 }
 
 export class AddQualityCheckUseCase {

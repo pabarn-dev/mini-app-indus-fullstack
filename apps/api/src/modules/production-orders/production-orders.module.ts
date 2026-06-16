@@ -128,5 +128,7 @@ import { ProductionOrdersController } from './presentation/controllers/productio
       inject: [PRODUCTION_ORDER_REPOSITORY, AUDIT_LOG_WRITER, TRANSACTION_RUNNER],
     },
   ],
+  // Exposed so other modules (Batches) can read orders via ProductionOrderGateway.
+  exports: [PRODUCTION_ORDER_REPOSITORY],
 })
 export class ProductionOrdersModule {}
